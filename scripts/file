@@ -1,0 +1,97 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+#
+# Wrapper around toybox file
+# Supports --mime-type and -b, --brief
+#
+
+toybox_file(){
+    if [ "$follow_symlink" = true ]; then
+    	toybox file -L "$@"
+    else
+	# TODO: use `ls -l` to show LINK_NAME
+    	toybox file "$@"
+    fi
+
+}
+
+
+toybox_file_brief(){
+    toybox_file "$@" | sed 's/^[^:]*:[[:space:]]*//g'
+}
+
+get_mime_type() {
+    # Implementation of file --mine-type using POSIX functions
+    for file in "$@"; do
+        case "$(toybox_file_brief "$file")" in
+            *"sh script")
+                mime_type="text/x-shellscript"
+                ;;
+            "JPEG image data")
+                mime_type="image/jpeg"
+                ;;
+            "ASCII text")
+                mime_type="plain/text"
+                ;;
+            "symbolic link")
+                mime_type="inode/symlink"
+                ;;
+            "directory")
+                mime_type="inode/directory"
+                ;;
+            *)
+                mime_type="application/octet-stream"
+                ;;
+        esac
+        if [ "$brief" = true ]; then
+            echo "$mime_type"
+        else
+            echo -n "${file}:"
+            echo -e "\t$mime_type"
+        fi
+    done
+}
+
+follow_symlinks=true
+mime_type_requested=false
+
+files=()
+while [ $# -gt 0 ]; do
+    case $1 in
+        -h)
+            # Set follow_symlinks to false
+            follow_symlinks=false
+            ;;
+        -L)
+            # Set follow_symlinks to true
+            follow_symlinks=true
+            ;;
+        -b|--brief)
+            brief=true
+            ;;
+        --mime-type)
+            # Set a flag indicating that MIME type is requested
+            mime_type_requested=true
+            ;;
+        --help)
+            toybox file --help
+            exit 0
+            ;;
+        *)
+            files+=("$1")
+            ;;
+    esac
+    shift
+done
+
+# Handle mime-type requested
+if [ "$mime_type_requested" = true ]; then
+    get_mime_type "${files[@]}"
+    exit 0
+fi
+
+if [ "$brief" = true ]; then
+    toybox_file_brief "${files[@]}"
+else
+    toybox_file "${files[@]}"
+fi

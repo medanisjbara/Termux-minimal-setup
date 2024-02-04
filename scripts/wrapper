@@ -1,0 +1,9 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+# wrapper around busybox applets
+# Mainly made to ignore flags made for GNU tools
+
+# Ignore --warning=* option (apt expects this from tar)
+set -- $(echo "$@" | sed 's/\(--warning=[^ ]*\)//g')
+
+busybox "$0" "$@"
