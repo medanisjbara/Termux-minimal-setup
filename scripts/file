@@ -9,7 +9,7 @@ toybox_file(){
     if [ "$follow_symlink" = true ]; then
     	toybox file -L "$@"
     else
-	# TODO: use `ls -l` to show LINK_NAME
+	# TODO: use `busybox readlink` to show LINK_NAME
     	toybox file "$@"
     fi
 
