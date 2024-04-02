@@ -59,7 +59,7 @@ echo -e 'termux\ntermux' | passwd
 	if [ -e "$TOYBOX" ]; then
 		ln -s "$TOYBOX" toybox
 		for applet in $(toybox); do
-			[ -e $applet ] || ln -s toybox "$applet"
+			[ -e "$applet" ] || ln -s toybox "$applet"
 		done
 	fi
 
